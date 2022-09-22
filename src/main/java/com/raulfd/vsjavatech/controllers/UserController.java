@@ -1,6 +1,5 @@
 package com.raulfd.vsjavatech.controllers;
 
-import com.raulfd.vsjavatech.domain.FileUpload;
 import com.raulfd.vsjavatech.repositories.UserRepository;
 import com.raulfd.vsjavatech.services.FileDownloadService;
 import com.raulfd.vsjavatech.services.FileUploadService;
@@ -62,33 +61,15 @@ public class UserController {
     }
 
     @PostMapping("/api/copy")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile multipartFile) {
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile multipartFile) throws ExecutionException, InterruptedException {
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
         File fileToSave = new File(fileName);
-        long size = multipartFile.getSize();
         Path pathOfThePrj = Path.of("").toAbsolutePath();
         Path dirPath = Paths.get(pathOfThePrj + FileSystems.getDefault().getSeparator() + "filesCopied" + FileSystems.getDefault().getSeparator() + fileToSave);
         FileUploadService fileUploadUtil = new FileUploadService();
-        CompletableFuture<File> savedFile = fileUploadUtil.saveFile(multipartFile, dirPath);
-        FileUpload response = new FileUpload();
-        if (savedFile.isDone()) {
-            try {
-                File fileDone = savedFile.get();
-                if (fileDone.exists()) {
-                    response.setFileName(fileDone.getName());
-                    response.setSize(size);
-                    response.setDownloadUri(dirPath.toString());
-                    response.setHttpStatus(HttpStatus.OK.toString());
-                } else {
-                    response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-                    response.setErrorMessage("Something goes wrong.");
-                }
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        CompletableFuture<HttpStatus> response = fileUploadUtil.saveFile(multipartFile, dirPath);
+
+        return new ResponseEntity<>(response.get());
     }
 
     @Async

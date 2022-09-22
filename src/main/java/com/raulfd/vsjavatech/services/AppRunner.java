@@ -15,6 +15,7 @@ public class AppRunner implements CommandLineRunner {
         this.repository = repository;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     private void deleteAllAndInsertNewUsers(UserRepository repository) {
         repository.deleteAll();
         User[] users = {

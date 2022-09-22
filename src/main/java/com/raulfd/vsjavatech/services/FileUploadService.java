@@ -1,5 +1,6 @@
 package com.raulfd.vsjavatech.services;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,9 +14,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 
 public class FileUploadService {
-    @Async("asyncImportExecutor")
-    public CompletableFuture<File> saveFile(MultipartFile multipartFile, Path dirPath) {
-        File file = new File(dirPath.toUri());
+
+    @Async("asyncExecutor")
+    public CompletableFuture<HttpStatus> saveFile(MultipartFile multipartFile, Path dirPath) {
         File parentFolder = new File(dirPath.getParent().toUri());
         if (!parentFolder.exists()) //noinspection ResultOfMethodCallIgnored Not needed to save result
             parentFolder.mkdirs();
@@ -27,7 +28,6 @@ public class FileUploadService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        return CompletableFuture.completedFuture(file);
+        return CompletableFuture.completedFuture(HttpStatus.OK);
     }
 }
