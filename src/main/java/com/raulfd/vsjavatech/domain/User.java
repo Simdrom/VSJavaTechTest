@@ -8,7 +8,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "Fullname")
+    @Column(name = "FullName")
     private String fullName;
     private String phone;
     private String address;
@@ -26,7 +26,7 @@ public class User {
     public String toString() {
         return "{" +
                 "\"id\":" + id + "," +
-                "\"fullname\":" + '\"' + fullName + '\"' + "," +
+                "\"fullName\":" + '\"' + fullName + '\"' + "," +
                 "\"phone\":" + '\"' + phone + '\"' + "," +
                 "\"address\":" + '\"' + address + '\"' +
                 '}';

@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 public class UserController {
-    private final String FILE_NAME = "src/main/resources/users.json";
     private final UserRepository repository;
 
     UserController(UserRepository repository) {
@@ -41,15 +40,11 @@ public class UserController {
     public ResponseEntity<?> downloadFile() {
         FileDownloadService downloadUtil = new FileDownloadService();
 
-        Resource resource = null;
+        Resource resource;
         try {
-            File fileToDownload = saveFileInResourcesFolder(repository);
+            File fileToDownload = saveFileInResourcesFolder(repository).get();
             resource = downloadUtil.getFileAsResource(fileToDownload).get();
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
@@ -97,11 +92,13 @@ public class UserController {
     }
 
     @Async
-    File saveFileInResourcesFolder(UserRepository repository) {
+    CompletableFuture<File> saveFileInResourcesFolder(UserRepository repository) {
         String usersJSON = repository.findAll().toString();
+        String FILE_NAME = "src/main/resources/users.json";
         File targetFile = new File(FILE_NAME);
         try {
-            if (targetFile.exists()) targetFile.delete();
+            if (targetFile.exists()) //noinspection ResultOfMethodCallIgnored Not needed to save result
+                targetFile.delete();
             BufferedWriter writer = new BufferedWriter(new FileWriter(targetFile));
             writer.write(usersJSON);
             writer.close();
@@ -109,7 +106,7 @@ public class UserController {
             throw new RuntimeException(e);
         }
 
-        return targetFile;
+        return CompletableFuture.completedFuture(targetFile);
 
     }
 }

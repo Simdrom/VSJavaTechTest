@@ -1,5 +1,6 @@
 package com.raulfd.vsjavatech.domain;
 
+@SuppressWarnings("unused")
 public class FileUpload {
     private String fileName;
     private String downloadUri;

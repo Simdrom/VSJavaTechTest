@@ -17,7 +17,8 @@ public class FileUploadService {
     public CompletableFuture<File> saveFile(MultipartFile multipartFile, Path dirPath) {
         File file = new File(dirPath.toUri());
         File parentFolder = new File(dirPath.getParent().toUri());
-        if (!parentFolder.exists()) parentFolder.mkdirs();
+        if (!parentFolder.exists()) //noinspection ResultOfMethodCallIgnored Not needed to save result
+            parentFolder.mkdirs();
         try (AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(dirPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             if (!Files.exists(dirPath)) {
                 Files.createDirectories(dirPath);

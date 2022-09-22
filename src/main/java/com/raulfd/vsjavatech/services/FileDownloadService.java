@@ -15,12 +15,13 @@ public class FileDownloadService {
     private Path foundFile;
 
     @Async
-    public CompletableFuture<Resource> getFileAsResource(File targetFile) throws IOException {
+    public CompletableFuture<Resource> getFileAsResource(File targetFile) {
         Path dirPath = Paths.get(targetFile.getParent());
-        Files.list(dirPath).filter(file -> file.getFileName().toString().startsWith(targetFile.getName())).forEach(file -> foundFile = file);
-
-        if (foundFile != null) return CompletableFuture.completedFuture(new UrlResource(foundFile.toUri()));
-
-        return CompletableFuture.completedFuture(null);
+        try {
+            Files.list(dirPath).filter(file -> file.getFileName().toString().startsWith(targetFile.getName())).forEach(file -> foundFile = file);
+            return (foundFile != null) ? CompletableFuture.completedFuture(new UrlResource(foundFile.toUri())): CompletableFuture.completedFuture(null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
