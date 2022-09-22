@@ -29,10 +29,12 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 public class UserController {
+    final FileUploadService fileUploadUtil;
     private final UserRepository repository;
 
-    UserController(UserRepository repository) {
+    UserController(UserRepository repository, FileUploadService fileUploadUtil) {
         this.repository = repository;
+        this.fileUploadUtil = fileUploadUtil;
     }
 
     @GetMapping("/api/users")
@@ -61,15 +63,14 @@ public class UserController {
     }
 
     @PostMapping("/api/copy")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile multipartFile) throws ExecutionException, InterruptedException {
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile multipartFile) throws IOException {
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
         File fileToSave = new File(fileName);
         Path pathOfThePrj = Path.of("").toAbsolutePath();
         Path dirPath = Paths.get(pathOfThePrj + FileSystems.getDefault().getSeparator() + "filesCopied" + FileSystems.getDefault().getSeparator() + fileToSave);
-        FileUploadService fileUploadUtil = new FileUploadService();
-        CompletableFuture<HttpStatus> response = fileUploadUtil.saveFile(multipartFile, dirPath);
 
-        return new ResponseEntity<>(response.get());
+        fileUploadUtil.saveFile(multipartFile.getBytes(), dirPath);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Async
